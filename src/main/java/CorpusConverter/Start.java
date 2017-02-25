@@ -20,12 +20,12 @@ public class Start {
      */
     public static void main(String[] args) {
         //List<Article>  longArticles = DataSetCreator.createLongArticleDataset();
-        List<Article> techBus = DataSetCreator.createEasyTechHardBusinessDataset();
+        //List<Article> techBus = DataSetCreator.createEasyTechHardBusinessDataset();
 
-        DataSetExporter export = new DataSetExporter("easyTechHardBusinnessTwo", techBus);
-        export.export(System.getProperty("user.dir") + "/dataset");
+        //DataSetExporter export = new DataSetExporter("easyTechHardBusinnessTwo", techBus);
+        //export.export(System.getProperty("user.dir") + "/dataset");
 
-        MultiLayerPerceptron_ArticleClassifier classifier = new MultiLayerPerceptron_ArticleClassifier("easyTechHardBusinness");
+        MultiLayerPerceptron_ArticleClassifier classifier = new MultiLayerPerceptron_ArticleClassifier("easyTechHardBusinnessTwo");
         classifier.BeginCalculations();
     }
 

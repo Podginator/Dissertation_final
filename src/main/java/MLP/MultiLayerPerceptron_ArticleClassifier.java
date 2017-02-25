@@ -81,7 +81,7 @@ public class MultiLayerPerceptron_ArticleClassifier {
                 .learningRate(mLearningRate)
                 .updater(Updater.NESTEROVS).momentum(0.9)
                 .list()
-                .layer(0, new DenseLayer.Builder().nIn(11).nOut(10)
+                .layer(0, new DenseLayer.Builder().nIn(12).nOut(10)
                         .weightInit(WeightInit.XAVIER)
                         .activation("relu")
                         .build())

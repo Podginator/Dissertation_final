@@ -19,6 +19,42 @@ public class TFIDFSimilarityConverter extends DoubleConverter {
     static Word2Vec WORD_TO_VEC =  WordVectorSerializer.readWord2VecModel(
             System.getProperty("user.dir") + "/GoogleNews-vectors-negative300.bin");
 
+    static Map<String, String[]> EXISTING_TFIDF = new HashMap<>();
+
+
+    static String PATH_TO_FILE = System.getProperty("user.dir") + "/tfidf.txt";
+
+    /**
+     * This is very memory inefficient, but we will be using this a lot, but
+     * we just want a fast lookup
+     */
+    static {
+        File tfidfFile = new File(PATH_TO_FILE);
+        Set<String[]> res = new HashSet<>();
+
+        // Assume the sentiment file contains the title
+        // and in the format Title : Score
+        // It should also be in order.
+        if (tfidfFile.exists()) {
+            Scanner scanner;
+            try {
+                scanner = new Scanner(tfidfFile);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("I checked this. How did you get here. ");
+            }
+            String currentLine;
+
+            while(scanner.hasNextLine())
+            {
+                currentLine = scanner.nextLine();
+                int index = currentLine.indexOf(':');
+                String title = currentLine.substring(0, currentLine.indexOf(':'));
+                currentLine = currentLine.substring(index + 1);
+
+                EXISTING_TFIDF.put(title, currentLine.replaceAll("\\s","").split(","));
+            }
+        }
+    }
 
     /** The Positive Article List */
     private Set<Article> mPositiveList;
@@ -27,9 +63,6 @@ public class TFIDFSimilarityConverter extends DoubleConverter {
     private TF_IDF mTF_IDFCalc;
 
 
-    private LinkedHashMap<String, LinkedHashMap<String, Double>> mEachScore;
-
-    static String PATH_TO_FILE = System.getProperty("user.dir") + "/tfidf.txt";
 
 
 
@@ -82,32 +115,11 @@ public class TFIDFSimilarityConverter extends DoubleConverter {
      * @return The article
      */
     private Collection<String[]> extractTermsFromArticle(Collection<Article> col) {
-
-        File tfidfFile = new File(PATH_TO_FILE);
         Set<String[]> res = new HashSet<>();
 
-        // Assume the sentiment file contains the title
-        // and in the format Title : Score
-        // It should also be in order.
-        if (tfidfFile.exists()) {
-            for (Article a : col) {
-                Scanner scanner;
-                try {
-                    scanner = new Scanner(tfidfFile);
-                } catch (Exception e) {
-                    throw new IllegalArgumentException("I checked this. How did you get here. ");
-                }
-                String currentLine;
-
-                while(scanner.hasNextLine())
-                {
-                    currentLine = scanner.nextLine();
-                    if(currentLine.contains(a.getTitle()))
-                    {
-                        currentLine = currentLine.substring(a.getTitle().length() + 2);
-                        res.add(currentLine.replaceAll("\\s","").split(","));
-                    }
-                }
+        for (Article a : col) {
+            if (EXISTING_TFIDF.containsKey(a.getTitle() + " ")) {
+                res.add(EXISTING_TFIDF.get(a.getTitle() + " "));
             }
         }
 
