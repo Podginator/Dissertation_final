@@ -77,7 +77,7 @@ public class MultiLayerPerceptron_ArticleClassifier {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(123)
                 .iterations(12)
-                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+                .optimizationAlgo(OptimizationAlgorithm.LINE_GRADIENT_DESCENT)
                 .learningRate(mLearningRate)
                 .updater(Updater.NESTEROVS).momentum(0.9)
                 .list()
