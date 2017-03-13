@@ -19,13 +19,8 @@ public class Start {
      * @param args args- filepath to the corpus
      */
     public static void main(String[] args) {
-        //List<Article>  longArticles = DataSetCreator.createLongArticleDataset();
-        List<Article> techBus = DataSetCreator.createEasyTechHardBusinessDataset();
 
-        DataSetExporter export = new DataSetExporter("easyTechHardBusinness", techBus);
-        export.export(System.getProperty("user.dir") + "/dataset");
-
-        MultiLayerPerceptron_ArticleClassifier classifier = new MultiLayerPerceptron_ArticleClassifier("easyTechHardBusinness");
+        MultiLayerPerceptron_ArticleClassifier classifier = new MultiLayerPerceptron_ArticleClassifier("easyTechHardBusinnessTwo");
         classifier.BeginCalculations();
     }
 
