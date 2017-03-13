@@ -3,7 +3,16 @@ package MLP;
 import org.datavec.api.records.reader.RecordReader;
 import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.split.FileSplit;
+import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
+import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
+import org.deeplearning4j.earlystopping.EarlyStoppingResult;
+import org.deeplearning4j.earlystopping.saver.LocalFileModelSaver;
+import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
+import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
+import org.deeplearning4j.earlystopping.termination.MaxTimeIterationTerminationCondition;
+import org.deeplearning4j.earlystopping.termination.ScoreImprovementEpochTerminationCondition;
+import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -15,6 +24,9 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.ui.api.UIServer;
+import org.deeplearning4j.ui.stats.StatsListener;
+import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
@@ -24,6 +36,7 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -33,13 +46,13 @@ public class MultiLayerPerceptron_ArticleClassifier {
 
 
     /** Learning Rate */
-    private double mLearningRate = 0.01;
+    private double mLearningRate = 0.05;
 
     /** batch Size */
-    private int mBatchSize = 50;
+    private int mBatchSize = 150;
 
     /** Epoch Size */
-    private int mEpochSize = 30;
+    private int mEpochSize = 150;
 
     private String mName;
 
@@ -76,8 +89,8 @@ public class MultiLayerPerceptron_ArticleClassifier {
     private void initModel() {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(123)
-                .iterations(12)
-                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+                .iterations(1)
+                .optimizationAlgo(OptimizationAlgorithm.LINE_GRADIENT_DESCENT)
                 .learningRate(mLearningRate)
                 .updater(Updater.NESTEROVS).momentum(0.9)
                 .list()
@@ -94,6 +107,7 @@ public class MultiLayerPerceptron_ArticleClassifier {
 
         mModel = new MultiLayerNetwork(conf);
         mModel.init();
+
     }
 
     public void BeginCalculations() {
@@ -101,12 +115,44 @@ public class MultiLayerPerceptron_ArticleClassifier {
         DataSetIterator testIter = new RecordReaderDataSetIterator(mEvalData, mBatchSize, 0, 2);
 
         initModel();
-        mModel.setListeners(new ScoreIterationListener(10));  //Print score every 10 parameter updates
+        //Initialize the user interface backend
+        UIServer uiServer = UIServer.getInstance();
+
+        //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
+        StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
+
+        //Attach the StatsStorage instance to the UI: this allows the contents of the StatsStorage to be visualized
+        uiServer.attach(statsStorage);
+
+        //Then add the StatsListener to collect this information from the network, as it trains
+        mModel.setListeners(new StatsListener(statsStorage));
 
 
-        for (int n = 0; n < mEpochSize; n++) {
-            mModel.fit(trainIter);
-        }
+        EarlyStoppingConfiguration esConf = new EarlyStoppingConfiguration.Builder()
+                .epochTerminationConditions(new MaxEpochsTerminationCondition(700))
+                .epochTerminationConditions(new ScoreImprovementEpochTerminationCondition(20, 0.01))
+                .iterationTerminationConditions(new MaxTimeIterationTerminationCondition(20, TimeUnit.MINUTES))
+                .scoreCalculator(new DataSetLossCalculator(trainIter, true))
+                .evaluateEveryNEpochs(1)
+                .modelSaver(new LocalFileModelSaver(System.getProperty("user.dir") + "/dataset/" + mName + "/"))
+                .build();
+
+        EarlyStoppingTrainer trainer = new EarlyStoppingTrainer(esConf, mModel, trainIter);
+
+        //Conduct early stopping training:
+        EarlyStoppingResult result = trainer.fit();
+
+        System.out.println("Termination reason: " + result.getTerminationReason());
+        System.out.println("Termination details: " + result.getTerminationDetails());
+        System.out.println("Total epochs: " + result.getTotalEpochs());
+        System.out.println("Best epoch number: " + result.getBestModelEpoch());
+        System.out.println("Score at best epoch: " + result.getBestModelScore());
+
+
+
+//        for (int n = 0; n < mEpochSize; n++) {
+//            mModel.fit(trainIter);
+//        }
 
         System.out.println("Evaluating model...");
         while (testIter.hasNext()) {
