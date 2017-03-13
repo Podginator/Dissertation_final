@@ -76,8 +76,7 @@ public class TF_IDF {
      * @return All the TFIDF Scores from the article.
      */
     public LinkedHashMap<String, Double> CalculateArticlesTFIDF(Article doc, Collection<Article> docs) {
-        Collection<String> termList = ArticleUtilities.GetListOfTermsSansStopWords(doc)
-                .stream().collect(Collectors.toSet());
+        Collection<String> termList = doc.getArticleTermsSansSubwords().stream().collect(Collectors.toSet());
         LinkedHashMap<String, Double> articleScores = new LinkedHashMap<>();
 
         for (String term : termList) {

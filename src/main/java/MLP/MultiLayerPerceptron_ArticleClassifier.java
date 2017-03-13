@@ -97,7 +97,7 @@ public class MultiLayerPerceptron_ArticleClassifier {
     }
 
     public void BeginCalculations() {
-                DataSetIterator trainIter = new RecordReaderDataSetIterator(mTrainData, mBatchSize, 0, 2);
+        DataSetIterator trainIter = new RecordReaderDataSetIterator(mTrainData, mBatchSize, 0, 2);
         DataSetIterator testIter = new RecordReaderDataSetIterator(mEvalData, mBatchSize, 0, 2);
 
         initModel();
