@@ -1,5 +1,8 @@
 package MLP;
 
+import CorpusConverter.DatasetCreators.DataSetCreator;
+import CorpusConverter.DatasetCreators.DataSetExporter;
+import CorpusConverter.FileRepository.Article;
 import org.datavec.api.records.reader.RecordReader;
 import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.split.FileSplit;
@@ -36,6 +39,7 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -228,4 +232,28 @@ public class MultiLayerPerceptron_ArticleClassifier {
         INDArray testPredicted = mModel.output(ds.getFeatures());
         //PlotUtil.plotTestData(ds.getFeatures(), ds.getLabels(), testPredicted, allXYPoints, predictionsAtXYPoints, nPointsPerAxis);
     }
+
+
+    public static void main(String[] args) {
+
+        if (args.length == 1) {
+            if (!args[0].isEmpty()) {
+
+                String dataset = args[0];
+                MultiLayerPerceptron_ArticleClassifier classifier = new MultiLayerPerceptron_ArticleClassifier(dataset);
+                try {
+                    classifier.BeginCalculations();
+                } catch (Exception e) {
+                    System.out.println("Error occured. have you checked the dataset " + dataset + " exists");
+                }
+
+                return;
+            }
+        }
+
+        System.out.println("Usage : args 0 = Dataset name");
+
+    }
+
+
 }

@@ -130,7 +130,7 @@ public class DataSetExporter {
         }
 
         int splitSize = split.length;
-        int testPos = splitSize - (splitSize / 20);
+        int testPos = splitSize - (int)(splitSize * 0.2);
         String[] testData = Arrays.copyOfRange(split,  0, testPos);
         String[] evalData = Arrays.copyOfRange(split, testPos, splitSize);
         res[0] = String.join("\n", testData);

@@ -101,9 +101,18 @@ public class DataSetCreator {
 
         });
 
-
     }
 
+
+    public static List<Article> createEasyTechSportHardBusinessPolitics() {
+        DoubleConverter fleschConverter = new FleschConverter();
+
+        return mRepository.List(e -> {
+            return (fleschConverter.convert(e) > 60.0 && (e.getTopic().equals("tech") || e.getTopic().equals("sport"))) ||
+                    (fleschConverter.convert(e) < 55.0 && (e.getTopic().equals("business") || e.getTopic().equals("politics")));
+
+        });
+    }
     //TODO - CREATE DATASETS AND CALCULATOR.
     // Person who likes similar articles (Qualitive)
     public static List<Article> createSimilarArticleDataset()
