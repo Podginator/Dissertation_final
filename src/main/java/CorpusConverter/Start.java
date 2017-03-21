@@ -15,7 +15,8 @@ import java.util.List;
 public class Start {
 
     /**
-     * The Main method
+     * The Main method . Intended to just create all the necessary data sets
+     * To test against.
      * @param args args- filepath to the corpus
      */
     public static void main(String[] args) {

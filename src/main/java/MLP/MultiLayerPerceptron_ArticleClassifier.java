@@ -153,11 +153,6 @@ public class MultiLayerPerceptron_ArticleClassifier {
         System.out.println("Score at best epoch: " + result.getBestModelScore());
 
 
-
-//        for (int n = 0; n < mEpochSize; n++) {
-//            mModel.fit(trainIter);
-//        }
-
         System.out.println("Evaluating model...");
         while (testIter.hasNext()) {
             DataSet t = testIter.next();
@@ -174,66 +169,13 @@ public class MultiLayerPerceptron_ArticleClassifier {
 
     }
 
-    private boolean initializeRecords() {
-        try {
-            mTrainData = new CSVRecordReader();
-            mEvalData = new CSVRecordReader();
-            mTrainData.initialize(new FileSplit(new File(System.getProperty("user.dir") + "/dataset/" + mName + "/train.csv")));
-            mEvalData.initialize(new FileSplit(new File(System.getProperty("user.dir") + "/dataset/" + mName + "/eval.csv")));
-
-        } catch (InterruptedException | IOException e) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
-     * Show the charted data.
+     * Run the Neural Network, entering the args for the correct dataset.
+     * Dataset folders should have a Train and Eval CSV.
+     *
+     *
+     * @param args Name of the FOLDER in the dataset.
      */
-    public void showChart() {
-        //Training is complete. Code that follows is for plotting the data & predictions only
-
-        //Plot the data:
-        double xMin = 0;
-        double xMax = 1.0;
-        double yMin = -0.2;
-        double yMax = 0.8;
-
-        //Let's evaluate the predictions at every point in the x/y input space
-        int nPointsPerAxis = 100;
-        double[][] evalPoints = new double[nPointsPerAxis * nPointsPerAxis][2];
-        int count = 0;
-        for (int i = 0; i < nPointsPerAxis; i++) {
-            for (int j = 0; j < nPointsPerAxis; j++) {
-                double x = i * (xMax - xMin) / (nPointsPerAxis - 1) + xMin;
-                double y = j * (yMax - yMin) / (nPointsPerAxis - 1) + yMin;
-
-                evalPoints[count][0] = x;
-                evalPoints[count][1] = y;
-
-                count++;
-            }
-        }
-
-        INDArray allXYPoints = Nd4j.create(evalPoints);
-        INDArray predictionsAtXYPoints = mModel.output(allXYPoints);
-
-        //Get all of the training data in a single array, and plot it:
-        initializeRecords();
-        int nTrainPoints = 1000;
-        DataSetIterator trainIter = new RecordReaderDataSetIterator(mTrainData, nTrainPoints, 0, 2);
-        DataSet ds = trainIter.next();
-        //PlotUtil.plotTrainingData(ds.getFeatures(), ds.getLabels(), allXYPoints, predictionsAtXYPoints, nPointsPerAxis);
-
-        int nTestPoints = 500;
-        DataSetIterator testIter = new RecordReaderDataSetIterator(mEvalData, nTestPoints, 0, 2);
-        ds = testIter.next();
-        INDArray testPredicted = mModel.output(ds.getFeatures());
-        //PlotUtil.plotTestData(ds.getFeatures(), ds.getLabels(), testPredicted, allXYPoints, predictionsAtXYPoints, nPointsPerAxis);
-    }
-
-
     public static void main(String[] args) {
 
         if (args.length == 1) {
