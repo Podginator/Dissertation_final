@@ -61,6 +61,12 @@ public class DataSetCreator {
         return mRepository.List(e -> { return sentimentConverter.convert(e) < -0.2; });
     }
 
+    public static List<Article> getPosBusiness() {
+        DoubleConverter fleschConverter = new FleschConverter();
+
+        return mRepository.List((e)->{return fleschConverter.convert(e) < 55.0 && e.getTopic().equals("business");});
+    }
+
     // Person Who likes Positive Article && Longer Articles
     public static List<Article> createShorterPositiveArticleDataset()
     {
@@ -72,7 +78,7 @@ public class DataSetCreator {
     public static List<Article> createNegativeTech()
     {
         DoubleConverter sentimentConverter = new PreCalculatedSentimentConverter();
-        return mRepository.List(e -> { return e.getTopic().equals("tech") && sentimentConverter.convert(e) > 0.2; });
+        return mRepository.List(e -> { return e.getTopic().equals("tech") && sentimentConverter.convert(e) < 0.2; });
     }
 
     // Person who likes difficult articles

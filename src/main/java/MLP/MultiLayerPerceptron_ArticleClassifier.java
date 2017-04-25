@@ -102,7 +102,7 @@ public class MultiLayerPerceptron_ArticleClassifier {
                         .weightInit(WeightInit.XAVIER)
                         .activation("relu")
                         .build())
-                .layer(1, new OutputLayer.Builder(LossFunction.NEGATIVELOGLIKELIHOOD)
+                .layer(1, new OutputLayer.Builder(LossFunction.RECONSTRUCTION_CROSSENTROPY)
                         .weightInit(WeightInit.XAVIER)
                         .activation("softmax").weightInit(WeightInit.XAVIER)
                         .nIn(10).nOut(2).build())
@@ -120,17 +120,16 @@ public class MultiLayerPerceptron_ArticleClassifier {
 
         initModel();
         //Initialize the user interface backend
-        UIServer uiServer = UIServer.getInstance();
+       // UIServer uiServer = UIServer.getInstance();
 
         //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
         StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
 
         //Attach the StatsStorage instance to the UI: this allows the contents of the StatsStorage to be visualized
-        uiServer.attach(statsStorage);
+        //uiServer.attach(statsStorage);
 
         //Then add the StatsListener to collect this information from the network, as it trains
         mModel.setListeners(new StatsListener(statsStorage));
-
 
         EarlyStoppingConfiguration esConf = new EarlyStoppingConfiguration.Builder()
                 .epochTerminationConditions(new MaxEpochsTerminationCondition(700))
@@ -161,7 +160,6 @@ public class MultiLayerPerceptron_ArticleClassifier {
             INDArray predicted = mModel.output(features, false);
 
             mEval.eval(lables, predicted);
-
         }
 
         //Print the evaluation statistics
@@ -174,7 +172,7 @@ public class MultiLayerPerceptron_ArticleClassifier {
      * Dataset folders should have a Train and Eval CSV.
      *
      *
-     * @param args Name of the FOLDER in the dataset.
+     * @param args Name of the FOLDER in the dataset. IE: longArticle for the long articles.
      */
     public static void main(String[] args) {
 
@@ -186,7 +184,8 @@ public class MultiLayerPerceptron_ArticleClassifier {
                 try {
                     classifier.BeginCalculations();
                 } catch (Exception e) {
-                    System.out.println("Error occured. have you checked the dataset " + dataset + " exists");
+                    e.printStackTrace();
+                    System.out.println("Error occured. have you checked the dataset "  + " exists");
                 }
 
                 return;
@@ -194,7 +193,6 @@ public class MultiLayerPerceptron_ArticleClassifier {
         }
 
         System.out.println("Usage : args 0 = Dataset name");
-
     }
 
 
